@@ -1,0 +1,1 @@
+include ':app', ':easyview', ':easyutil', ':easyanim', ':easyorm', ':easyioc', ':easytest', ':easythread', ':easynet'
