@@ -1,1 +1,1 @@
-include ':easyview', ':easyutil', ':easyanim', ':easyorm', ':easyioc', ':easytest', ':easythread', ':easynet', ':xscroller'
+include ':easyview', ':easyutil', ':easyanim', ':easyorm', ':easyioc', ':easytest', ':easythread', ':easynet', ':xscroller', ':easyrefresh'

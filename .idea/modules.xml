@@ -3,15 +3,17 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/EasyAndroid.iml" filepath="$PROJECT_DIR$/EasyAndroid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/xscroller/demoscroller.iml" filepath="$PROJECT_DIR$/xscroller/demoscroller.iml" />
       <module fileurl="file://$PROJECT_DIR$/easyanim/easyanim.iml" filepath="$PROJECT_DIR$/easyanim/easyanim.iml" />
       <module fileurl="file://$PROJECT_DIR$/easyioc/easyioc.iml" filepath="$PROJECT_DIR$/easyioc/easyioc.iml" />
       <module fileurl="file://$PROJECT_DIR$/easynet/easynet.iml" filepath="$PROJECT_DIR$/easynet/easynet.iml" />
       <module fileurl="file://$PROJECT_DIR$/easyorm/easyorm.iml" filepath="$PROJECT_DIR$/easyorm/easyorm.iml" />
+      <module fileurl="file://$PROJECT_DIR$/easyrefresh/easyrefresh.iml" filepath="$PROJECT_DIR$/easyrefresh/easyrefresh.iml" />
       <module fileurl="file://$PROJECT_DIR$/easytest/easytest.iml" filepath="$PROJECT_DIR$/easytest/easytest.iml" />
       <module fileurl="file://$PROJECT_DIR$/easythread/easythread.iml" filepath="$PROJECT_DIR$/easythread/easythread.iml" />
       <module fileurl="file://$PROJECT_DIR$/easyutil/easyutil.iml" filepath="$PROJECT_DIR$/easyutil/easyutil.iml" />
       <module fileurl="file://$PROJECT_DIR$/easyview/easyview.iml" filepath="$PROJECT_DIR$/easyview/easyview.iml" />
-      <module fileurl="file://$PROJECT_DIR$/xscroller/demoscroller.iml" filepath="$PROJECT_DIR$/xscroller/demoscroller.iml" />
+      <module fileurl="file://$PROJECT_DIR$/xscroller/xscroller.iml" filepath="$PROJECT_DIR$/xscroller/xscroller.iml" />
     </modules>
   </component>
 </project>
