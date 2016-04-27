@@ -1,1 +1,1 @@
-include ':app', ':easyview', ':easyutil', ':easyanim', ':easyorm', ':easyioc', ':easytest', ':easythread', ':easynet'
+include ':easyview', ':easyutil', ':easyanim', ':easyorm', ':easyioc', ':easytest', ':easythread', ':easynet', ':xscroller'

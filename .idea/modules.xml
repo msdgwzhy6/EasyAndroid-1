@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/EasyAndroid.iml" filepath="$PROJECT_DIR$/EasyAndroid.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/easyanim/easyanim.iml" filepath="$PROJECT_DIR$/easyanim/easyanim.iml" />
       <module fileurl="file://$PROJECT_DIR$/easyioc/easyioc.iml" filepath="$PROJECT_DIR$/easyioc/easyioc.iml" />
       <module fileurl="file://$PROJECT_DIR$/easynet/easynet.iml" filepath="$PROJECT_DIR$/easynet/easynet.iml" />
@@ -12,6 +11,7 @@
       <module fileurl="file://$PROJECT_DIR$/easythread/easythread.iml" filepath="$PROJECT_DIR$/easythread/easythread.iml" />
       <module fileurl="file://$PROJECT_DIR$/easyutil/easyutil.iml" filepath="$PROJECT_DIR$/easyutil/easyutil.iml" />
       <module fileurl="file://$PROJECT_DIR$/easyview/easyview.iml" filepath="$PROJECT_DIR$/easyview/easyview.iml" />
+      <module fileurl="file://$PROJECT_DIR$/xscroller/demoscroller.iml" filepath="$PROJECT_DIR$/xscroller/demoscroller.iml" />
     </modules>
   </component>
 </project>

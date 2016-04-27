@@ -9,7 +9,6 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/easyanim" />
             <option value="$PROJECT_DIR$/easyioc" />
             <option value="$PROJECT_DIR$/easynet" />
@@ -18,12 +17,12 @@
             <option value="$PROJECT_DIR$/easythread" />
             <option value="$PROJECT_DIR$/easyutil" />
             <option value="$PROJECT_DIR$/easyview" />
+            <option value="$PROJECT_DIR$/xscroller" />
           </set>
         </option>
         <option name="myModules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/easyanim" />
             <option value="$PROJECT_DIR$/easyioc" />
             <option value="$PROJECT_DIR$/easynet" />
@@ -32,6 +31,7 @@
             <option value="$PROJECT_DIR$/easythread" />
             <option value="$PROJECT_DIR$/easyutil" />
             <option value="$PROJECT_DIR$/easyview" />
+            <option value="$PROJECT_DIR$/xscroller" />
           </set>
         </option>
       </GradleProjectSettings>
