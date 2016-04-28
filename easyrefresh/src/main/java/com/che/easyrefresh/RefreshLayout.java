@@ -5,9 +5,9 @@ import android.animation.FloatEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -27,18 +27,18 @@ public class RefreshLayout extends LinearLayout {
     private int contentWidth;//内容视图的宽度
     private int contentHeight;//内容视图的高度
     private int maxScrollDistance = 600;//最大滑动距离
-    private int gotoDefaultTime = 200;//恢复到默认状态的时间
-    private int gotoHeaderTime = 201;//恢复到正在刷新状态的时间
-    private int gotoCompleteTime = 500;//恢复到完成状态的时间
+    private int gotoDefaultTime = 200;//PullNo到Default的时间
+    private int gotoHeaderTime = 201;//PullYes到Refreshing的时间
+    private int gotoCompleteTime = 500;//RefreshComplete到Default的时间
 
     private RefreshState refreshState = RefreshState.Default;
     private final FloatEvaluator evaluator;
     private RefreshListener listener;
     private float xDistance, yDistance, xLast, yLast;//滑动距离及坐标
 
-
     public RefreshLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
+        LogUtil.print("");
         setOrientation(VERTICAL);
         touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         evaluator = new FloatEvaluator();
@@ -47,15 +47,25 @@ public class RefreshLayout extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
+        LogUtil.print("");
         content = getChildAt(0);
-        header = LayoutInflater.from(getContext()).inflate(R.layout.view_header, null);
-        addView(header, 0);
+//        header = LayoutInflater.from(getContext()).inflate(R.layout.view_header, null);
+//        addView(header, 0);
+    }
+
+    public void setHeader(View header) {
+        LogUtil.print("");
+        this.header = header;
+        addView(header,0);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        LogUtil.print("");
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-        measureContentView(content, widthMeasureSpec, heightMeasureSpec);
+        if (content != null) {
+            measureContentView(content, widthMeasureSpec, heightMeasureSpec);
+        }
     }
 
     //重新测量内容视图
@@ -68,20 +78,16 @@ public class RefreshLayout extends LinearLayout {
         child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
     }
 
+    //重新测量内容视图
     @Override
     protected void onLayout(boolean flag, int i, int j, int k, int l) {
+        LogUtil.print("");
         super.onLayout(flag, i, j, k, l);
-        headerWidth = header.getMeasuredWidth();
-        headerHeight = header.getMeasuredHeight();
-        LogUtil.print("header:headerWidth=" + headerWidth + "\theaderHeight=" + headerHeight);
-
-        contentWidth = content.getMeasuredWidth();
-        contentHeight = content.getMeasuredHeight();
-        LogUtil.print("content:contentWidth=" + contentWidth + "\tcontentHeight=" + contentHeight);
-
         int paddingLeft = getPaddingLeft();
         int paddingTop = getPaddingTop();
         if (header != null) {
+            headerWidth = header.getMeasuredWidth();
+            headerHeight = header.getMeasuredHeight();
             MarginLayoutParams lp = (MarginLayoutParams) header.getLayoutParams();
             final int left = paddingLeft + lp.leftMargin;
             final int top = paddingTop + lp.topMargin - headerHeight;
@@ -90,6 +96,8 @@ public class RefreshLayout extends LinearLayout {
             header.layout(left, top, right, bottom);
         }
         if (content != null) {
+            contentWidth = content.getMeasuredWidth();
+            contentHeight = content.getMeasuredHeight();
             MarginLayoutParams lp = (MarginLayoutParams) content.getLayoutParams();
             final int left = paddingLeft + lp.leftMargin;
             final int top = paddingTop + lp.topMargin;
@@ -99,6 +107,11 @@ public class RefreshLayout extends LinearLayout {
         }
     }
 
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        LogUtil.print("");
+    }
 
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
@@ -110,8 +123,8 @@ public class RefreshLayout extends LinearLayout {
         if (refreshState == RefreshState.RefreshComplete) {
             return super.onTouchEvent(ev);
         }
-        final float curX = ev.getX();
-        final float curY = ev.getY();
+        float curX = ev.getX();
+        float curY = ev.getY();
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 xDistance = yDistance = 0f;
@@ -136,7 +149,6 @@ public class RefreshLayout extends LinearLayout {
                     }
                     //下拉中，超过了刷新位置
                     if (yDistance >= headerHeight) {
-                        onPreRefresh();
                         refreshState = RefreshState.PullYes;
                     }
                     float progress = yDistance / (headerHeight - touchSlop);
@@ -166,10 +178,6 @@ public class RefreshLayout extends LinearLayout {
         return super.onTouchEvent(ev);
     }
 
-
-    private void onPreRefresh() {
-
-    }
 
     private void movePos(float yDistance) {
         scrollTo(0, (int) (-yDistance));
@@ -248,7 +256,7 @@ public class RefreshLayout extends LinearLayout {
         switch (refreshState) {
             case Refreshing:
                 //直接打开刷新状态（不必再手动下拉）
-                scrollTo(0, -headerHeight);
+                movePos(headerHeight);
                 if (listener != null) {
                     listener.doRefresh();
                 }

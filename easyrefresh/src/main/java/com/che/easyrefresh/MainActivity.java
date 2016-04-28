@@ -2,6 +2,7 @@ package com.che.easyrefresh;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -26,13 +27,17 @@ public class MainActivity extends Activity {
         index = 0;
         LogUtil.print("");
         final RefreshLayout refreshLayout = (RefreshLayout) findViewById(R.id.view_refresh);
-        View header = findViewById(R.id.view_header);
+//        View header = findViewById(R.id.view_header);
+        View header = LayoutInflater.from(this).inflate(R.layout.view_header, null);
+        refreshLayout.setHeader(header);
         View content = findViewById(R.id.view_content);
 
         final ImageView iv = (ImageView) header.findViewById(R.id.iv_header);
         final TextView tv = (TextView) header.findViewById(R.id.tv_header);
         final TextView tvIndex = (TextView) content.findViewById(R.id.tv);
-        Glide.with(MainActivity.this).load(R.drawable.l2_01).into(iv);
+
+        refreshLayout.setRefreshState(RefreshState.Refreshing);//进去就开始刷新
+
         refreshLayout.setListener(new RefreshListener() {
             @Override
             public void onPullProgress(float progress) {
