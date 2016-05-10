@@ -5,12 +5,13 @@ import android.animation.FloatEvaluator;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
-import android.graphics.Canvas;
 import android.os.Build;
+import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewConfiguration;
+import android.widget.AbsListView;
 import android.widget.LinearLayout;
 
 /**
@@ -36,9 +37,25 @@ public class RefreshLayout extends LinearLayout {
     private RefreshListener listener;
     private float xDistance, yDistance, xLast, yLast;//滑动距离及坐标
 
+    public enum RefreshState {
+        Default,//默认状态
+        PullNo,//下拉中，没有到刷新位置
+        PullYes,//下拉中，超过了刷新位置
+        Refreshing,//刷新中
+        RefreshComplete//刷新完成
+    }
+
+    public interface RefreshListener {
+
+        void onPullProgress(float progress);//下拉进度值
+
+        void onStateChanged(RefreshState state);//视图状态改变
+
+        void doRefresh();//具体执行刷新的方法
+    }
+
     public RefreshLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        LogUtil.print("");
         setOrientation(VERTICAL);
         touchSlop = ViewConfiguration.get(context).getScaledTouchSlop();
         evaluator = new FloatEvaluator();
@@ -47,41 +64,31 @@ public class RefreshLayout extends LinearLayout {
     @Override
     protected void onFinishInflate() {
         super.onFinishInflate();
-        LogUtil.print("");
         content = getChildAt(0);
-//        header = LayoutInflater.from(getContext()).inflate(R.layout.view_header, null);
-//        addView(header, 0);
     }
 
     public void setHeader(View header) {
-        LogUtil.print("");
         this.header = header;
-        addView(header,0);
+        addView(header, 0);
     }
 
+    //重新测量
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        LogUtil.print("");
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         if (content != null) {
-            measureContentView(content, widthMeasureSpec, heightMeasureSpec);
+            final MarginLayoutParams lp = (MarginLayoutParams) content.getLayoutParams();
+            final int childWidthMeasureSpec = getChildMeasureSpec(widthMeasureSpec,
+                    getPaddingLeft() + getPaddingRight() + lp.leftMargin + lp.rightMargin, lp.width);
+            final int childHeightMeasureSpec = getChildMeasureSpec(heightMeasureSpec,
+                    getPaddingTop() + getPaddingBottom() + lp.topMargin, lp.height);
+            content.measure(childWidthMeasureSpec, childHeightMeasureSpec);
         }
     }
 
-    //重新测量内容视图
-    private void measureContentView(View child, int parentWidthMeasureSpec, int parentHeightMeasureSpec) {
-        final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
-        final int childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,
-                getPaddingLeft() + getPaddingRight() + lp.leftMargin + lp.rightMargin, lp.width);
-        final int childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec,
-                getPaddingTop() + getPaddingBottom() + lp.topMargin, lp.height);
-        child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
-    }
-
-    //重新测量内容视图
+    //重新布局
     @Override
     protected void onLayout(boolean flag, int i, int j, int k, int l) {
-        LogUtil.print("");
         super.onLayout(flag, i, j, k, l);
         int paddingLeft = getPaddingLeft();
         int paddingTop = getPaddingTop();
@@ -107,21 +114,35 @@ public class RefreshLayout extends LinearLayout {
         }
     }
 
-    @Override
-    protected void onDraw(Canvas canvas) {
-        super.onDraw(canvas);
-        LogUtil.print("");
+    //检查内容视图是否能向下滚动
+    public static boolean checkViewCanScrollDown(View view) {
+        if (Build.VERSION.SDK_INT < 14) {
+            if (view instanceof AbsListView) {
+                final AbsListView absListView = (AbsListView) view;
+                return absListView.getChildCount() > 0
+                        && (absListView.getFirstVisiblePosition() > 0 || absListView.getChildAt(0)
+                        .getTop() < absListView.getPaddingTop());
+            } else {
+                return view.getScrollY() > 0;
+            }
+        } else {
+            return ViewCompat.canScrollVertically(view, -1);
+        }
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent ev) {
+    public boolean dispatchTouchEvent(MotionEvent ev) {
         //刷新过程中,不再处理手势
         if (refreshState == RefreshState.Refreshing) {
-            return super.onTouchEvent(ev);
+            return dispatchTouchEventSupper(ev);
         }
         //刷新完成，恢复默认中，不再处理手势
         if (refreshState == RefreshState.RefreshComplete) {
-            return super.onTouchEvent(ev);
+            return dispatchTouchEventSupper(ev);
+        }
+        //内容视图能向下滚动时，不再处理手势
+        if (checkViewCanScrollDown(content)) {
+            return dispatchTouchEventSupper(ev);
         }
         float curX = ev.getX();
         float curY = ev.getY();
@@ -130,18 +151,15 @@ public class RefreshLayout extends LinearLayout {
                 xDistance = yDistance = 0f;
                 xLast = curX;
                 yLast = curY;
+                //子类和自己同时处理手势
+                dispatchTouchEventSupper(ev);
                 return true;
             case MotionEvent.ACTION_MOVE:
                 xDistance += (curX - xLast);
                 yDistance += (curY - yLast);
-                LogUtil.print("xDistance=" + xDistance + "\tyDistance=" + yDistance);
                 xLast = curX;
                 yLast = curY;
-                //上拉时，不处理手势
-                if (yDistance <= 0) {
-                    return super.onTouchEvent(ev);
-                }
-                if (Math.abs(yDistance) > Math.abs(xDistance) && yDistance > touchSlop && yDistance < maxScrollDistance) {
+                if (Math.abs(yDistance) > Math.abs(xDistance) && yDistance > touchSlop && yDistance <= maxScrollDistance) {
                     movePos(yDistance);
                     //下拉中，没有到刷新位置
                     if (yDistance < headerHeight) {
@@ -157,14 +175,13 @@ public class RefreshLayout extends LinearLayout {
                         listener.onPullProgress(progress);
                         listener.onStateChanged(refreshState);
                     }
+                }
+                if(refreshState == RefreshState.Default){
+                    return dispatchTouchEventSupper(ev);
+                }else {
                     return true;
                 }
-                break;
             case MotionEvent.ACTION_UP:
-                //上拉时，不处理手势
-                if (yDistance <= 0) {
-                    return super.onTouchEvent(ev);
-                }
                 //PullYes到Refreshing的动画开始
                 if (yDistance >= headerHeight) {
                     movePos(headerHeight, gotoHeaderTime);
@@ -173,11 +190,18 @@ public class RefreshLayout extends LinearLayout {
                 else {
                     movePos(0, gotoDefaultTime);
                 }
-                break;
+                if(refreshState == RefreshState.Default){
+                    return dispatchTouchEventSupper(ev);
+                }else {
+                    return true;
+                }
         }
-        return super.onTouchEvent(ev);
+        return dispatchTouchEventSupper(ev);
     }
 
+    public boolean dispatchTouchEventSupper(MotionEvent e) {
+        return super.dispatchTouchEvent(e);
+    }
 
     private void movePos(float yDistance) {
         scrollTo(0, (int) (-yDistance));
@@ -209,7 +233,6 @@ public class RefreshLayout extends LinearLayout {
                     refreshState = RefreshState.Default;
                     if (listener != null) {
                         listener.onStateChanged(refreshState);
-                        listener.doRefresh();
                     }
                 }
                 //PullYes到Refreshing的动画完成
@@ -242,12 +265,6 @@ public class RefreshLayout extends LinearLayout {
         animator.start();
     }
 
-    @Override
-    public void scrollTo(int x, int y) {
-        LogUtil.print("x=" + x + "\ty=" + y);
-        super.scrollTo(x, y);
-    }
-
     public RefreshState getRefreshState() {
         return refreshState;
     }
@@ -257,13 +274,19 @@ public class RefreshLayout extends LinearLayout {
             case Refreshing:
                 //直接打开刷新状态（不必再手动下拉）
                 movePos(headerHeight);
+                refreshState = RefreshState.Refreshing;
                 if (listener != null) {
+                    listener.onStateChanged(refreshState);
                     listener.doRefresh();
                 }
                 break;
             case RefreshComplete:
                 //恢复到完成状态
                 movePos(0, gotoCompleteTime);
+                refreshState = RefreshState.RefreshComplete;
+                if (listener != null) {
+                    listener.onStateChanged(refreshState);
+                }
                 break;
         }
     }

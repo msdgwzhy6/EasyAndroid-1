@@ -27,7 +27,6 @@ public class MainActivity extends Activity {
         index = 0;
         LogUtil.print("");
         final RefreshLayout refreshLayout = (RefreshLayout) findViewById(R.id.view_refresh);
-//        View header = findViewById(R.id.view_header);
         View header = LayoutInflater.from(this).inflate(R.layout.view_header, null);
         refreshLayout.setHeader(header);
         View content = findViewById(R.id.view_content);
@@ -36,16 +35,16 @@ public class MainActivity extends Activity {
         final TextView tv = (TextView) header.findViewById(R.id.tv_header);
         final TextView tvIndex = (TextView) content.findViewById(R.id.tv);
 
-        refreshLayout.setRefreshState(RefreshState.Refreshing);//进去就开始刷新
+        refreshLayout.setRefreshState(RefreshLayout.RefreshState.Refreshing);//进去就开始刷新
 
-        refreshLayout.setListener(new RefreshListener() {
+        refreshLayout.setListener(new RefreshLayout.RefreshListener() {
             @Override
             public void onPullProgress(float progress) {
 
             }
 
             @Override
-            public void onStateChanged(RefreshState state) {
+            public void onStateChanged(RefreshLayout.RefreshState state) {
                 switch (state) {
                     case Default:
                         tv.setText("默认状态");
@@ -93,7 +92,7 @@ public class MainActivity extends Activity {
                         LogUtil.print("刷新完成");
                         tv.setText("刷新完成");
                         tvIndex.setText("我是内容视图：" + index);
-                        refreshLayout.setRefreshState(RefreshState.RefreshComplete);
+                        refreshLayout.setRefreshState(RefreshLayout.RefreshState.RefreshComplete);
                     }
                 }.execute();
 
